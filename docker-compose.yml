@@ -1,0 +1,62 @@
+version: '3.7'
+
+services:
+  django_gunicorn:
+    volumes:
+      - static:/static
+      - .:/code
+    env_file:
+      - .env
+    environment:
+        MYSQL_DATABASE: ${MYSQL_DATABASE}
+        MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+        MYSQL_HOST: ${MYSQL_HOST}
+        MYSQL_USER: ${MYSQL_USER}
+    build:
+      context: .
+    ports:
+      - "8000:8000"
+    networks:
+      - backend
+  
+  nginx:
+    build: ./nginx
+    volumes:
+      - static:/static
+    ports:
+      - "80:80"
+    depends_on:
+      - django_gunicorn
+    networks:
+      - backend
+  
+  mongodb:
+    image: mongo:6-jammy
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongodb:/data/db
+    networks:
+      - backend
+
+  cache:
+    image: redis:6.2-alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+    volumes: 
+      - cache:/data
+    networks:
+      - backend
+
+networks:
+  backend:
+
+volumes:
+  mongodb:
+  static:
+  cache:
+    driver: local
+

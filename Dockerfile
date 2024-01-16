@@ -1,14 +1,12 @@
-FROM python:3.9-alpine
-
-RUN pip install --upgrade pip
-
-COPY ./requirements.txt .
-RUN pip install -r requirements.txt
-
-COPY ./django_project /app
+FROM python:3.9
 
 WORKDIR /app
 
-COPY ./entrypoint.sh /
-ENTRYPOINT ["sh", "/entrypoint.sh"]
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY websocket_server /app/websocket_server
+
+CMD ["python3", "websocket_server/server.py"]
+
 

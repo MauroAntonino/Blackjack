@@ -1,33 +1,18 @@
 version: '3.7'
 
 services:
-  django_gunicorn:
-    volumes:
-      - static:/static
-      - .:/code
+  my_websockets_app:
+    build: .
+    stdin_open: true
+    tty: true
+    ports:
+      - "8765:8765"
     env_file:
       - .env
     environment:
-        MYSQL_DATABASE: ${MYSQL_DATABASE}
-        MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
-        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-        MYSQL_HOST: ${MYSQL_HOST}
-        MYSQL_USER: ${MYSQL_USER}
-    build:
-      context: .
-    ports:
-      - "8000:8000"
-    networks:
-      - backend
-  
-  nginx:
-    build: ./nginx
-    volumes:
-      - static:/static
-    ports:
-      - "80:80"
-    depends_on:
-      - django_gunicorn
+        REDIS_PASSWORD: ${REDIS_PASSWORD}
+        REDIS_PORT: ${REDIS_PORT}
+        REDIS_HOST: ${REDIS_HOST}
     networks:
       - backend
   
@@ -40,7 +25,7 @@ services:
     networks:
       - backend
 
-  cache:
+  redis:
     image: redis:6.2-alpine
     restart: always
     ports:

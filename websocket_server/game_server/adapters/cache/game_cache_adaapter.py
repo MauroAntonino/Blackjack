@@ -5,13 +5,17 @@ from typing import List
 from game_server.entities.objects.player import Player
 from game_server.entities.objects.game import Game
 from game_server.entities.objects.dealer import Dealer
+import os
 name = "players"
 game_name = "game_status"
+port = os.getenv("REDIS_PORT")
+host = os.getenv("REDIS_HOST")
+password = os.getenv("REDIS_PASSWORD")
 
 class GameCacheAdapter(GameCacheInterface):
 
     def __init__(self) -> None:
-        self.redis = redis.Redis(host='localhost', port=6379, decode_responses=True, password="eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81")
+        self.redis = redis.Redis(host=host, port=port, decode_responses=True, password=password)
 
     def load_players_data(self):
         palyers = self.redis.get(name)

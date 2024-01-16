@@ -38,6 +38,8 @@ class GameLogicAdapter(GameLogicInterface):
                 player.credit += player.bet
             if sum_dealer < sum_player and sum_player <= 21:
                 player.credit += player.bet * 2
+            if sum_dealer > 21 and sum_player <= 21:
+                player.credit += player.bet * 2
         game_status.isRoundFinished = True
         return game_status
     

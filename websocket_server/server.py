@@ -9,11 +9,15 @@ import asyncio
 from websockets.server import serve
 import json
 import uuid
+import os
 
 first_time = True
 connected_clients = {}
-MAX_CONNECTIONS = 4
+WEBSOCKET_HOST = os.getenv("WEBSOCKET_HOST")
+WEBSOCKET_PORT = int(os.getenv("WEBSOCKET_PORT"))
+MAX_CONNECTIONS = int(os.getenv("MAX_CONNECTIONS"))
 connection_semaphore = asyncio.Semaphore(MAX_CONNECTIONS)
+WAITING_TIME = 25
 
 game = GameService(logic=GameLogicAdapter(), cache=GameCacheAdapter())
 game_status = Game(
@@ -32,9 +36,9 @@ async def broadcast(message):
         await client.send(message)
 
 async def send_time_message():
-    cont = 10
-    while cont> 0:
-        message = "the game is starting in {time} seconds".format(time=cont)
+    time = WAITING_TIME
+    while time > 0:
+        message = "the game is starting in {time} seconds".format(time=time)
         print(message)
         message = json.dumps(
             {
@@ -44,7 +48,7 @@ async def send_time_message():
         )
         await broadcast(message)
         await asyncio.sleep(5)
-        cont -= 5
+        time -= 5
 
 async def send_first_cards_message(game_status):
     cards = game_status.dealer.cards
@@ -259,7 +263,7 @@ async def game_run(websocket):
                 del connected_clients[client_id]
 
 async def main():
-    async with serve(game_run, "0.0.0.0", 8765, ping_interval=None):
+    async with serve(game_run, WEBSOCKET_HOST, WEBSOCKET_PORT, ping_interval=None):
         print("server started")
         await asyncio.Future()  # run forever
 

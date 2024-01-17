@@ -10,18 +10,28 @@ from websockets.server import serve
 import json
 import uuid
 import os
+from game_server.entities.objects.player import Player
+
 
 first_time = True
 connected_clients = {}
 WEBSOCKET_HOST = os.getenv("WEBSOCKET_HOST")
 WEBSOCKET_PORT = int(os.getenv("WEBSOCKET_PORT"))
-MAX_CONNECTIONS = int(os.getenv("MAX_CONNECTIONS"))
+MAX_CONNECTIONS = 4
 connection_semaphore = asyncio.Semaphore(MAX_CONNECTIONS)
 WAITING_TIME = 25
 
+
+player_test = Player(
+    name="test", 
+    player_id = str(uuid.uuid4()),
+    bet = 0,
+    credit = 100
+    )
 game = GameService(logic=GameLogicAdapter(), cache=GameCacheAdapter())
+game.cache.save_players_data(players=[player_test])
 game_status = Game(
-    players=game.cache.load_players_data(),
+    players=[Player()],
     dealer=Dealer(),
     cards_deck=game.game_logic.shuffle_cards(),
     isRoundStarting=False,
@@ -220,6 +230,7 @@ async def game_run(websocket):
             try:
                 async for message in websocket:
                     msg = json.loads(message)
+                    print(msg)
                     if msg["type"] == "login" and game.cache.get_game_status().isRoundFinished == True:
                         game.cache.save_players_data(players= game.cache.load_players_data() + [
                             Player(

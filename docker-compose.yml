@@ -16,6 +16,8 @@ services:
         REDIS_PASSWORD: ${REDIS_PASSWORD}
         REDIS_PORT: ${REDIS_PORT}
         REDIS_HOST: ${REDIS_HOST}
+    volumes: 
+      - .:/app
     networks:
       - backend
   
